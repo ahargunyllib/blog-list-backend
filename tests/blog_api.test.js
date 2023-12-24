@@ -9,7 +9,7 @@ const api = supertest(app);
 beforeEach(async () => {
 	await Blog.deleteMany({});
 	await Blog.insertMany(listHelper.dummyBlogs);
-});
+}, 10000);
 
 describe("when there is initially some blogs saved", () => {
 	test("blogs are returned as json", async () => {
@@ -77,6 +77,45 @@ describe("addition of a new blog", () => {
 	
 		const blogsAtEnd = await listHelper.blogsInDb();
 		expect(blogsAtEnd).toHaveLength(listHelper.dummyBlogs.length);
+	});
+});
+
+describe("deletion of a blog", () => {
+	test("succeds with status code 204 if id is valid", async () => {
+		const blogAtStart = await listHelper.blogsInDb();
+		const blogToDelete = blogAtStart[0];
+
+		await api
+			.delete(`/api/blogs/${blogToDelete.id}`)
+			.expect(204);
+		
+		const blogAtEnd = await listHelper.blogsInDb();
+		expect(blogAtEnd).toHaveLength(listHelper.dummyBlogs.length - 1);
+
+		const title = blogAtEnd.map(blog => blog.title);
+		expect(title).not.toContain(blogToDelete.title);
+	});
+});
+
+describe("updating a blog", () => {
+	test("succeds with status code 200 if id is valid", async () => {
+		const blogAtStart = await listHelper.blogsInDb();
+		const blogToUpdate = blogAtStart[0];
+
+		const updatedBlog = {
+			title: blogToUpdate.title,
+			author: blogToUpdate.author,
+			url: blogToUpdate.url,
+			likes: blogToUpdate.likes + 1
+		};
+
+		await api
+			.put(`/api/blogs/${blogToUpdate.id}`)
+			.send(updatedBlog)
+			.expect(200);
+		
+		const result = await api.get(`/api/blogs/${blogToUpdate.id}`);
+		expect(result.body.likes).toBe(blogToUpdate.likes + 1);
 	});
 });
 

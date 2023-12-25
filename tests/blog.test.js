@@ -38,6 +38,6 @@ describe("most likes", () => {
 		expect(result).toEqual({
 			author: "Edsger W. Dijkstra",
 			likes: 17
-		})
-	})
-})
+		});
+	});
+});

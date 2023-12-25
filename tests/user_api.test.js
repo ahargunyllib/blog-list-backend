@@ -59,4 +59,25 @@ describe("when there is initially one user in db", () => {
 		const usersAtEnd = await listHelper.usersInDb();
 		expect(usersAtEnd).toEqual(usersAtStart);
 	});
+
+	test("creation fails with proper statuscode and message if user is invalid", async () => {
+		const usersAtStart = await listHelper.usersInDb();
+
+		const newUser = {
+			username: "s",
+			name: "s",
+			password: "s"
+		};
+
+		const result = await api
+			.post("/api/users")
+			.send(newUser)
+			.expect(400)
+			.expect("Content-Type", /application\/json/);
+		
+		expect(result.body.error).toContain("shorter than the minimum allowed");
+
+		const usersAtEnd = await listHelper.usersInDb();
+		expect(usersAtEnd).toEqual(usersAtStart);
+	});
 });

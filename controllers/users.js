@@ -8,8 +8,7 @@ usersRouter.get("/", async (request, response) => {
 		.populate("blogs", {
 			title: 1,
 			author: 1,
-			url: 1,
-			likes: 1
+			url: 1
 		});
 	response.json(users);
 });
@@ -26,7 +25,7 @@ usersRouter.post("/", async (request, response) => {
 		passwordHash
 	});
 
-	const savedUser = user.save();
+	const savedUser = await user.save();
 	response.status(201).json(savedUser);
 });
 
